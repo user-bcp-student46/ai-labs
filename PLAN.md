@@ -93,3 +93,13 @@ Después de cada cambio aprobado, ejecutar `mvn test` desde `auth/`; ejecutar `m
 | auth | H-AUTH-02 | `mvn verify` | Éxito: 5 pruebas, 0 fallos, 0 errores; JaCoCo generado. Cobertura de clases modificadas: `LegacyDatabase` 72/79 (91,1%), `PasswordHasher` 2/2 (100%). |
 
 En una ejecución anterior se omitió `mvn -Dtest=AuthResourceTest test`; posteriormente se ejecutó y pasó según la tabla. H-AUTH-01 está `Resuelto`; H-AUTH-02 volvió a `Pendiente` por el riesgo de error de migración absorbido. CodeQL y Dependency Review remotos no ejecutados.
+
+## Ejecución HU-01 — H-AUTH-03 y H-AUTH-04
+
+- **Decisiones aplicadas localmente:** JWT HS256 con `sub`, `role`, `iat` y `exp`; duración conservada en 3600 segundos; secreto externo `AUTH_TOKEN_SECRET` (mínimo 32 bytes); rechazo del token Base64 legado; CORS de auth configurable con `AUTH_CORS_ORIGINS` y default local `http://localhost:4200`. Los orígenes de despliegue no se han confirmado; definirlos al preparar cada entorno.
+- **Archivos modificados:** auth `pom.xml`, `LegacyTokenUtil.java`, `AuthResource.java`, `application.properties`, pruebas Java y configuración de pruebas; API `requirements.txt`, `app/main.py`, `tests/test_api.py`; `compose.yaml`; `README.md`.
+- **Baseline:** auth `mvn verify`: 14 pruebas, 0 fallos; API `python -m pytest -q` en `api/`: 4 pruebas, 0 fallos después de preparar `.venv` con `python tools/lab.py setup api`.
+- **Post-cambio:** auth `mvn '-Dtest=AuthResourceTest,LegacyTokenUtilTest' test`: 19 pruebas, 0 fallos; luego `mvn verify`: 20 pruebas, 0 fallos. JaCoCo: `LegacyTokenUtil` 14/14 líneas y 4/4 ramas; `AuthResource` 25/25 líneas y 14/14 ramas.
+- **Post-cambio API:** `api/.venv/Scripts/python.exe -m pytest -q`: 12 pruebas, 0 fallos. Cobertura con `--cov=app.main`: 102 sentencias, 7 no cubiertas, 20 ramas con 3 parciales; 92% total según Coverage.py. Persisten warnings de deprecación de FastAPI/Starlette.
+- **Configuración:** PyYAML parseó `compose.yaml` y confirmó que auth y API reciben `AUTH_TOKEN_SECRET`; `docker compose config --quiet` no se pudo ejecutar porque el comando `docker` no está instalado.
+- **Revisión:** `H-AUTH-03` y `H-AUTH-04` continúan `Pendiente` hasta revisión humana; compatibilidad fue coordinada localmente por cambio de emisor/verificador, pero no se ejecutó el despliegue Compose ni una prueba HTTP auth→API.

@@ -1,5 +1,8 @@
 package com.bcp.workshop.auth;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
@@ -22,6 +26,7 @@ import static org.hamcrest.Matchers.notNullValue;
 class AuthResourceTest {
     private static final String TEST_USERNAME = "local'quote";
     private static final String TEST_PASSWORD = "LocalTestPassword123!";
+    private static final String TEST_SIGNING_SECRET = "test-only-key-for-isolated-workshop-signing-with-extra-test-bytes";
     private static final String DB_URL = System.getenv().getOrDefault("AUTH_DB_URL", "jdbc:sqlite:./data/workshop.db");
 
     @Test
@@ -36,8 +41,54 @@ class AuthResourceTest {
                 .body("user.displayName", is("Workshop Student"))
                 .body("user.role", is("STUDENT"))
                 .body("token", notNullValue())
-                .body("expiresIn", is(3600))
+                .body("expiresIn", is(LegacyTokenUtil.TOKEN_LIFETIME_SECONDS))
                 .body("debug", is("authenticated-with-legacy-flow"));
+    }
+
+    @Test
+    void issuesVerifiableTokenWithExpectedIdentityAndExpiry() {
+        String token = LegacyTokenUtil.create("student", "STUDENT");
+
+        var decoded = JWT.require(Algorithm.HMAC256(TEST_SIGNING_SECRET)).build().verify(token);
+
+        assertEquals("student", decoded.getSubject());
+        assertEquals("STUDENT", decoded.getClaim("role").asString());
+        assertTrue(decoded.getExpiresAt().after(decoded.getIssuedAt()));
+        assertEquals(LegacyTokenUtil.TOKEN_LIFETIME_SECONDS,
+                (decoded.getExpiresAt().getTime() - decoded.getIssuedAt().getTime()) / 1000);
+    }
+
+    @Test
+    void rejectsTamperedTokenSignature() {
+        String token = LegacyTokenUtil.create("student", "STUDENT");
+        String[] parts = token.split("\\.");
+        parts[2] = (parts[2].charAt(0) == 'a' ? "b" : "a") + parts[2].substring(1);
+        String tamperedToken = String.join(".", parts);
+
+        assertThrows(SignatureVerificationException.class,
+                () -> JWT.require(Algorithm.HMAC256(TEST_SIGNING_SECRET)).build().verify(tamperedToken));
+    }
+
+    @Test
+    void corsAllowsConfiguredWorkshopOrigin() {
+        given()
+                .header("Origin", "http://localhost:4200")
+                .header("Access-Control-Request-Method", "POST")
+                .when().options("/auth/login")
+                .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", is("http://localhost:4200"));
+    }
+
+    @Test
+    void corsDoesNotAllowUnconfiguredOrigin() {
+        given()
+                .header("Origin", "http://unapproved.example")
+                .header("Access-Control-Request-Method", "POST")
+                .when().options("/auth/login")
+                .then()
+                .statusCode(403)
+                .header("Access-Control-Allow-Origin", is((String) null));
     }
 
     @Test
