@@ -37,6 +37,15 @@ Puedes recorrer los tres componentes. Conserva las evidencias anteriores y añad
 
 Necesitas Docker con Compose y el motor iniciado. Podman Compose es otra opción si ya está preparado en tu equipo.
 
+Antes de arrancar, configura una clave local compartida por auth y api (mínimo 32 bytes) y, si corresponde, los orígenes permitidos para auth. En PowerShell puedes generar una clave efímera para la sesión:
+
+```powershell
+$env:AUTH_TOKEN_SECRET = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+$env:AUTH_CORS_ORIGINS = 'http://localhost:4200'
+```
+
+No guardes la clave en archivos versionados ni la compartas. En otros entornos, configura estas variables mediante el mecanismo de secretos aprobado.
+
 ```bash
 docker compose up --build
 ```

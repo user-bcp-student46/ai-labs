@@ -260,3 +260,15 @@ de `auth/`. En este paso no se modificó código de producción.
 - `HALLAZGOS.md`
 - `PLAN.md`
 - Código y pruebas de `auth/` citados en esta evidencia
+
+## Actualización HU-01 — H-AUTH-03 y H-AUTH-04
+
+| componente | IDs relacionados | comando | código de salida | resultado |
+|---|---|---|---:|---|
+| auth | H-AUTH-03, H-AUTH-04 | `mvn '-Dtest=AuthResourceTest,LegacyTokenUtilTest' test` (`cwd auth/`) | 0 | 19 pruebas, 0 fallos: claims/firma, manipulación de firma, secreto ausente/corto y preflight CORS permitido/no permitido. |
+| auth | H-AUTH-03, H-AUTH-04 | `mvn verify` (`cwd auth/`) | 0 | 20 pruebas, 0 fallos. JaCoCo: `LegacyTokenUtil` 14/14 líneas (100%) y 4/4 ramas; `AuthResource` 25/25 líneas (100%) y 14/14 ramas. |
+| api | H-AUTH-03 | `.venv/Scripts/python.exe -m pytest -q` (`cwd api/`) | 0 | 12 pruebas, 0 fallos; tokens válidos, alterados, expirados, formato legado, algoritmo no permitido, claims requeridos, header ausente y clave ausente/corta. |
+| api | H-AUTH-03 | `.venv/Scripts/python.exe -m pytest --cov=app.main --cov-report=term-missing` (`cwd api/`) | 0 | 12 pruebas, 0 fallos; 102 sentencias, 7 no cubiertas, 20 ramas con 3 parciales; 92% de cobertura total según Coverage.py. Permanecen warnings deprecados de FastAPI/Starlette. |
+| repo | H-AUTH-04 | `docker compose config --quiet` (`cwd ai-labs/`) | no ejecutado | Docker no está instalado. YAML de Compose se parseó con PyYAML y se confirmó la variable `AUTH_TOKEN_SECRET` para auth y API. |
+
+**Límites de validación:** no se ejecutó un test HTTP real de extremo a extremo auth→API; los tests prueban emisor y verificador por separado con la misma clave ficticia de prueba. No se validó despliegue real ni configuración de orígenes de producción. No se imprimieron ni almacenaron tokens o claves reales.
