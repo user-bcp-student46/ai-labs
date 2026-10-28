@@ -158,17 +158,21 @@ cada endpoint.
      verifica con BCrypt. La migración desde esquemas antiguos puede fallar y su
      error de inicialización se absorbe; H-AUTH-02 continúa `Pendiente` en
      `HALLAZGOS.md`.
-   - El token actual **no está firmado ni cifrado**: se codifica en Base64 e
-     incluye un secreto fijo en el código. Aunque el cuerpo declara
-     `expiresIn: 3600` y el token contiene una marca temporal, el código actual
-     solo lo crea; no verifica firma ni expiración. No debe tratarse como una
-     credencial validada por el servidor.
+   - El token actual es un JWT firmado con HS256. Incluye subject `sub`, claim
+     `role`, `iat` y `exp`; API verifica la firma y expiración con HS256. La
+     duración declarada sigue siendo `expiresIn: 3600` segundos. El formato
+     Base64 legado ya no se acepta y requiere volver a iniciar sesión.
+   - El secreto se obtiene de `AUTH_TOKEN_SECRET`, no del código; debe contener
+     al menos 32 bytes. Si falta o es demasiado corto, auth no emite un token y
+     API responde `503` a solicitudes protegidas. Auth y API deben configurarse
+     con el mismo valor secreto fuera de archivos versionados.
    - La respuesta conserva el campo `debug` y el error `500` puede exponer el
      mensaje y la clase de una excepción.
    - El `401` usa el mismo mensaje para usuario inexistente y contraseña
      incorrecta, pero incluye el username enviado por el cliente.
-   - CORS está habilitado con un patrón que acepta cualquier origen. No es una
-     restricción de acceso ni reemplaza la autenticación.
+   - CORS de auth permite por defecto `http://localhost:4200`, configurable
+     mediante `AUTH_CORS_ORIGINS`. En despliegues, configurar explícitamente los
+     orígenes aprobados. CORS no reemplaza la autenticación.
 
    Evidencia del request/response: `auth/src/main/java/com/bcp/workshop/auth/AuthResource.java:15-57`;
    campos del request: `auth/src/main/java/com/bcp/workshop/auth/LoginRequest.java:3-7`;
