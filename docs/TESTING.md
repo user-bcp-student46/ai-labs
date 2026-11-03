@@ -71,11 +71,11 @@ Código de salida: `0`.
 | Endpoint | Caso | Tipo | Resultado esperado | ID relacionado |
 |---|---|---|---|---|
 | `GET /api/tasks` | Usuario con tareas sembradas pide su lista | feliz | `200`, lista con las tareas de ese usuario | — |
-| `GET /api/tasks` | Header `Authorization` ausente | error | `401`, `detail` con `"Invalid token: ..."` | H-API-01 |
+| `GET /api/tasks` | Header `Authorization` ausente | error | `401`, `detail="Invalid token"` | H-API-01, H-API-06 |
 | `GET /api/tasks` | Token con secreto incorrecto | error | `401` | H-API-01 |
 | `GET /api/tasks` | Token con cantidad de segmentos distinta de 4 | error | `401` | H-API-01 |
 | `GET /api/tasks` | Token con fecha de expiración vencida | error | `401` | H-API-01 |
-| `GET /api/tasks` | Valor del token no es Base64 válido | error | `401`, mensaje distinto ("Invalid base64-encoded string…") | H-API-01 |
+| `GET /api/tasks` | Valor del token no es Base64 válido | error | `401`, `detail="Invalid token"` sin mensaje interno | H-API-06 |
 | `GET /api/tasks` | Token rotado vía `WORKSHOP_TOKEN_SECRET` | feliz | `200` (confirma que el secreto ya no es fijo en código) | H-API-01 |
 | `GET /api/tasks` | Usuario autenticado pide `?owner=trainer` (otro usuario) | borde / seguridad (IDOR) | `200`, pero solo con tareas propias, nunca de `trainer` | H-API-02 |
 | `GET /api/tasks` | Usuario sin tareas sembradas | borde | `200`, lista vacía `[]` | — |
@@ -100,7 +100,7 @@ Código de salida: `0`.
 | `POST /api/requirements` | Nombre de archivo vacío (`filename=""`) | error | `422` | H-API-04 |
 | `POST /api/requirements` | Token inválido | error | `401` | H-API-01 |
 | `GET /api/backend-health` | Backend de `auth` responde (simulado) | feliz | `200`, `status`/`body` reflejan la respuesta simulada | — |
-| `GET /api/backend-health` | Backend de `auth` no alcanzable (simulado) | borde | `200`, `status=0`, `body` con el texto de la excepción | — |
+| `GET /api/backend-health` | Backend de `auth` no alcanzable (simulado) | borde | `200`, `status=0`, mensaje genérico en `body` | H-API-06 |
 | `GET /api/backend-health` | Token inválido | error | `401` | H-API-01 |
 
 ---
@@ -256,15 +256,14 @@ def test_rejects_token_with_wrong_secret(tmp_path: Path) -> None:
     assert response.status_code == 401
 
 
-def test_rejects_malformed_base64_token(tmp_path: Path) -> None:
-    # Cubre el segundo mensaje de error documentado en docs/ENDPOINTS.md
-    # para GET /api/tasks: un valor que no es Base64 válido (distinto del
-    # caso "invalid token" por cantidad de segmentos).
+def test_rejects_malformed_base64_token(tmp_path: Path, caplog) -> None:
     app = create_app(str(tmp_path / "workshop.db"), str(tmp_path / "uploads"))
     with TestClient(app) as client:
         response = client.get("/api/tasks", headers={"Authorization": "Bearer not-base64!!"})
     assert response.status_code == 401
-    assert "Invalid base64-encoded string" in response.json()["detail"]
+    assert response.json()["detail"] == "Invalid token"
+    assert "Authentication token validation failed" in caplog.text
+    assert "Invalid base64-encoded string" not in caplog.text
 
 
 def test_rejects_token_with_wrong_segment_count(tmp_path: Path) -> None:
@@ -618,10 +617,10 @@ def test_backend_health_returns_downstream_status_and_body(tmp_path: Path, monke
     assert body["body"] == '{"status":"UP"}'
 
 
-def test_backend_health_returns_zero_status_when_downstream_unreachable(tmp_path: Path, monkeypatch) -> None:
-    # Caso borde documentado: la ruta responde 200 igual, con status=0 y el
-    # texto de la excepción en el cuerpo, cuando el backend no es
-    # alcanzable.
+def test_backend_health_returns_zero_status_when_downstream_unreachable(
+    tmp_path: Path, monkeypatch, caplog
+) -> None:
+    # La respuesta mantiene el status cero sin exponer el mensaje de la excepción.
     def fake_request_raises(self, method, url, *args, **kwargs):
         raise OSError("downstream no disponible (simulado para la prueba)")
 
@@ -632,7 +631,9 @@ def test_backend_health_returns_zero_status_when_downstream_unreachable(tmp_path
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == 0
-    assert "downstream no disponible" in body["body"]
+    assert body["body"] == "Backend health check failed"
+    assert "Health check request failed (OSError)" in caplog.text
+    assert "downstream no disponible" not in caplog.text
 
 
 def test_backend_health_rejects_invalid_token(tmp_path: Path) -> None:

@@ -13,6 +13,7 @@ y que el parsing usa constantes con nombre en vez de índices sueltos.
 from __future__ import annotations
 
 import base64
+import logging
 import os
 import time
 
@@ -26,6 +27,9 @@ EXPIRATION_SEGMENT_INDEX = 2
 SECRET_SEGMENT_INDEX = 3
 TOKEN_SECRET_ENV_VAR = "WORKSHOP_TOKEN_SECRET"
 DEFAULT_LEGACY_TOKEN_SECRET = "WORKSHOP_SECRET_2026"  # valor de prueba del workshop, no un secreto real
+INVALID_TOKEN_DETAIL = "Invalid token"
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Identity(BaseModel):
@@ -58,4 +62,5 @@ def verify_legacy_token(authorization: str = Header(default="")) -> Identity:
         token = authorization.replace("Bearer ", "")
         return _parse_legacy_token(token)
     except Exception as error:
-        raise HTTPException(status_code=401, detail="Invalid token: " + str(error)) from error
+        LOGGER.warning("Authentication token validation failed (%s)", type(error).__name__)
+        raise HTTPException(status_code=401, detail=INVALID_TOKEN_DETAIL) from error

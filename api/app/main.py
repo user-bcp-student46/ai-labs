@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import sqlite3
 from pathlib import Path
@@ -14,6 +15,10 @@ from app.authorization import resolve_owner
 from app.schemas import TaskCreateRequest
 from app.security import Identity, verify_legacy_token
 from app.uploads import store_requirement_file
+
+HEALTH_CHECK_FAILURE_BODY = "Backend health check failed"
+
+LOGGER = logging.getLogger(__name__)
 
 
 def create_app(db_path: str | None = None, upload_dir: str | None = None) -> FastAPI:
@@ -82,7 +87,8 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None) -> Fas
             response = urllib3.PoolManager().request("GET", url, timeout=3.0)
             return {"requestedBy": identity.username, "status": response.status, "body": response.data.decode("utf-8")}
         except Exception as error:
-            return {"requestedBy": identity.username, "status": 0, "body": str(error)}
+            LOGGER.warning("Health check request failed (%s)", type(error).__name__)
+            return {"requestedBy": identity.username, "status": 0, "body": HEALTH_CHECK_FAILURE_BODY}
 
     @app.on_event("shutdown")
     def close_connection() -> None:

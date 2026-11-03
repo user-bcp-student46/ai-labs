@@ -70,15 +70,14 @@ def test_rejects_token_with_wrong_secret(tmp_path: Path) -> None:
     assert response.status_code == 401
 
 
-def test_rejects_malformed_base64_token(tmp_path: Path) -> None:
-    # Cubre el segundo mensaje de error documentado en docs/ENDPOINTS.md
-    # para GET /api/tasks: un valor que no es Base64 válido (distinto del
-    # caso "invalid token" por cantidad de segmentos).
+def test_rejects_malformed_base64_token(tmp_path: Path, caplog) -> None:
     app = create_app(str(tmp_path / "workshop.db"), str(tmp_path / "uploads"))
     with TestClient(app) as client:
         response = client.get("/api/tasks", headers={"Authorization": "Bearer not-base64!!"})
     assert response.status_code == 401
-    assert "Invalid base64-encoded string" in response.json()["detail"]
+    assert response.json()["detail"] == "Invalid token"
+    assert "Authentication token validation failed" in caplog.text
+    assert "Invalid base64-encoded string" not in caplog.text
 
 
 def test_rejects_token_with_wrong_segment_count(tmp_path: Path) -> None:
@@ -431,10 +430,10 @@ def test_backend_health_returns_downstream_status_and_body(tmp_path: Path, monke
     assert body["body"] == '{"status":"UP"}'
 
 
-def test_backend_health_returns_zero_status_when_downstream_unreachable(tmp_path: Path, monkeypatch) -> None:
-    # Caso borde documentado: la ruta responde 200 igual, con status=0 y el
-    # texto de la excepción en el cuerpo, cuando el backend no es
-    # alcanzable.
+def test_backend_health_returns_zero_status_when_downstream_unreachable(
+    tmp_path: Path, monkeypatch, caplog
+) -> None:
+    # La respuesta mantiene el status cero sin exponer el mensaje de la excepción.
     def fake_request_raises(self, method, url, *args, **kwargs):
         raise OSError("downstream no disponible (simulado para la prueba)")
 
@@ -445,7 +444,9 @@ def test_backend_health_returns_zero_status_when_downstream_unreachable(tmp_path
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == 0
-    assert "downstream no disponible" in body["body"]
+    assert body["body"] == "Backend health check failed"
+    assert "Health check request failed (OSError)" in caplog.text
+    assert "downstream no disponible" not in caplog.text
 
 
 def test_backend_health_rejects_invalid_token(tmp_path: Path) -> None:

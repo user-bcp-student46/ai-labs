@@ -29,11 +29,8 @@ algo explícitamente, queda marcado como pregunta abierta.
     parcialmente").
 - **Formato común de error de autenticación**: cualquier ruta con token
   ausente, mal formado, con secreto incorrecto o expirado responde
-  `401` con `{"detail": "Invalid token: <detalle interno>"}`. El texto
-  exacto después de "Invalid token: " varía según la causa (por ejemplo,
-  un error de decodificación Base64 o el mensaje genérico `invalid token`);
-  no se documenta como un contrato estable porque expone detalles internos
-  (ver nota de seguridad).
+  `401` con `{"detail": "Invalid token"}`. El detalle se mantiene genérico
+  y no expone el texto de una excepción interna.
 - **Variables de entorno relevantes para integrar un entorno propio**:
   `WORKSHOP_DB_PATH` (ruta de la base SQLite, por defecto
   `./data/workshop.db`), `WORKSHOP_UPLOAD_DIR` (carpeta de archivos
@@ -109,8 +106,8 @@ Ejemplo real (capturado contra el código actual, usuario `student`):
 
 | Código | Cuándo ocurre | Ejemplo de cuerpo |
 |---|---|---|
-| `401` | Header `Authorization` ausente, con secreto incorrecto, con cantidad de segmentos distinta de 4, o con expiración vencida. | `{"detail": "Invalid token: invalid token"}` (header ausente) |
-| `401` | El valor después de `Bearer ` no es Base64 válido. | `{"detail": "Invalid token: Invalid base64-encoded string: number of data characters (9) cannot be 1 more than a multiple of 4"}` |
+| `401` | Header `Authorization` ausente, inválido, con secreto incorrecto, con cantidad de segmentos distinta de 4, o con expiración vencida. | `{"detail": "Invalid token"}` |
+| `401` | El token no es Base64 válido. | `{"detail": "Invalid token"}` |
 
 **6. Notas de seguridad**
 
@@ -119,10 +116,9 @@ Ejemplo real (capturado contra el código actual, usuario `student`):
   las tareas devueltas siempre es `identity.username`, extraído del token
   verificado. Evidencia: `api/app/main.py` (`list_tasks` →
   `resolve_owner`), `api/app/authorization.py`.
-- El mensaje de error 401 incluye el texto interno de la excepción
-  (`str(error)`); esto corresponde a `H-API-06` en `HALLAZGOS.md`, que
-  sigue en estado "Aprobado" (no resuelto todavía). Un integrador no debe
-  parsear ese texto como contrato estable.
+- El mensaje de error 401 es genérico y no incluye texto interno de la
+  excepción (H-API-06 en `HALLAZGOS.md`). El servidor registra solo el tipo
+  de excepción, sin su mensaje.
 
 ---
 
@@ -200,7 +196,7 @@ Ejemplo real (para la primera petición de ejemplo, usuario `student`):
 
 | Código | Cuándo ocurre | Ejemplo de cuerpo |
 |---|---|---|
-| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). | `{"detail": "Invalid token: invalid token"}` |
+| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). | `{"detail": "Invalid token"}` |
 | `422` | Falta `title` o `description` en el cuerpo, o el cuerpo no es un JSON válido según el modelo. | `{"detail": [{"type": "missing", "loc": ["body", "title"], "msg": "Field required", "input": {"description": "falta title"}}]}` |
 
 **6. Notas de seguridad**
@@ -268,7 +264,7 @@ arriba):
 
 | Código | Cuándo ocurre | Ejemplo de cuerpo |
 |---|---|---|
-| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). | `{"detail": "Invalid token: invalid token"}` |
+| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). | `{"detail": "Invalid token"}` |
 
 **6. Notas de seguridad**
 
@@ -332,7 +328,7 @@ Ejemplo real:
 
 | Código | Cuándo ocurre | Ejemplo de cuerpo |
 |---|---|---|
-| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). | `{"detail": "Invalid token: invalid token"}` |
+| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). | `{"detail": "Invalid token"}` |
 | `422` | No se envía el campo `file` en el multipart. | `{"detail": [{"type": "missing", "loc": ["body", "file"], "msg": "Field required", "input": null}]}` |
 | `422` | La extensión del archivo (tras normalizar el nombre) no está en la lista permitida (`.txt`, `.md`, `.pdf`, `.docx`). | `{"detail": "Extensión de archivo no permitida"}` |
 | `422` | El contenido del archivo supera 2 MiB (2 097 152 bytes). | `{"detail": "El archivo excede el tamaño máximo permitido"}` |
@@ -390,16 +386,14 @@ no en el código de estado HTTP de esta respuesta.
 |---|---|---|
 | `requestedBy` | string | Siempre el `username` del token verificado. |
 | `status` | integer | Código de estado HTTP devuelto por `AUTH_HEALTH_URL`, o `0` si la petición a ese backend falló (por ejemplo, por no poder conectar). |
-| `body` | string | Cuerpo de la respuesta del backend consultado (decodificado como UTF-8), o el texto de la excepción si la petición falló. |
+| `body` | string | Cuerpo de la respuesta del backend consultado (decodificado como UTF-8), o `Backend health check failed` si la petición falló. |
 
-Ejemplo real capturado (sin un backend `auth` disponible en `localhost:8080`,
-es decir, el caso de fallo de conexión — el único reproducible en este
-entorno de revisión):
+Ejemplo de fallo al consultar `auth`:
 ```json
 {
   "requestedBy": "student",
   "status": 0,
-  "body": "HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /q/health (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=8080): Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión\"))"
+  "body": "Backend health check failed"
 }
 ```
 
@@ -413,15 +407,13 @@ corriendo.
 
 | Código | Cuándo ocurre | Ejemplo de cuerpo |
 |---|---|---|
-| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). Esta es la única forma en que esta ruta responde con un código de error HTTP propio. | `{"detail": "Invalid token: invalid token"}` |
+| `401` | Mismas condiciones que `GET /api/tasks` (token ausente/inválido/expirado). Esta es la única forma en que esta ruta responde con un código de error HTTP propio. | `{"detail": "Invalid token"}` |
 
 **6. Notas de seguridad**
 
-- El cuerpo de la respuesta puede incluir el texto crudo de una excepción
-  de conexión (`body`) cuando la consulta al backend falla; esto
-  corresponde a `H-API-06` en `HALLAZGOS.md` (estado "Aprobado", no
-  resuelto todavía) y puede filtrar detalles internos de red/infra a quien
-  consuma este endpoint.
+- Ante una falla del backend, `body` contiene un mensaje genérico y el
+  servidor registra solo el tipo de excepción, sin su texto
+  (H-API-06 en `HALLAZGOS.md`).
 - La URL consultada (`AUTH_HEALTH_URL`) es configurable por variable de
   entorno y no se valida ni restringe dentro de este código; quien
   despliegue el servicio controla ese valor.
