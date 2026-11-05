@@ -1,5 +1,13 @@
 # Hallazgos
 
+## auth
+
+| id | componente | hallazgo | tipo | explicacion | evidencia (archivo:linea) | severidad | estado | resolución |
+|---|---|---|---|---|---|---|---|---|
+| H-AUTH-01 | auth | Consultas SQLite construidas mediante concatenación en el login | Vulnerabilidad | `LegacyDatabase.findByCredentials` armaba el SQL concatenando `username`/`password`; un valor como `student'--` o una inyección en `password` alteraba la consulta y permitía iniciar sesión sin la contraseña correcta. | `auth/src/main/java/com/bcp/workshop/auth/LegacyDatabase.java:32` (antes del fix) | alta | Resuelto | Se reemplazó el `Statement` con SQL concatenado por un `PreparedStatement` con parámetros posicionales (`?`) en `findByCredentials`; sin cambios en `AuthResource.java`, `LegacyTokenUtil.java`, `UserRecord.java`, `LoginRequest.java` ni en el contrato de `POST /auth/login`. Pruebas (`auth/src/test/java/com/bcp/workshop/auth/AuthResourceTest.java`): `rejectsSqlInjectionInUsernameWithoutToken`, `rejectsSqlInjectionInPasswordWithoutToken`, `rejectsSqlCommentInUsernameWithoutToken`, `acceptsBenignApostropheWithout500`, más casos de caracterización de login válido/inválido (`logsInWithTrainerUser`, `rejectsIncorrectPasswordForStudent`, `rejectsNonexistentUser`, `rejectsBlankUsername`, `rejectsBlankPassword`). Antes del fix: `mvn test` → `Tests run: 10, Failures: 2` (`rejectsSqlCommentInUsernameWithoutToken` y `rejectsSqlInjectionInPasswordWithoutToken` en rojo, esperaban 401 y obtenían 200). Después del fix: `mvn test "-Dquarkus.http.test-port=0"` → `Tests run: 10, Failures: 0, Errors: 0`, `BUILD SUCCESS`. Cobertura del método modificado (`findByCredentials`, reporte `auth/target/site/jacoco/com.bcp.workshop.auth/LegacyDatabase.java.html` tras `mvn verify`): 100% de instrucciones y 100% de la única rama real (`if (result.next())`); la clase completa reporta 94%/62% por ramas de manejo de excepción preexistentes en `initialize()` y en el propio `catch`, no tocadas en este cambio. Nota: el payload de ejemplo `' OR '1'='1` (sin comentario SQL) documentado en `openspec/changes/h-auth-01-parameterized-login-query/specs/auth-login/spec.md` y `design.md` no reproducía el bypass por sí solo (la cláusula `AND password=...` lo neutralizaba por precedencia SQL); la vulnerabilidad se confirmó igualmente con los otros dos vectores (inyección en `password` y comentario SQL `student'--` en `username`). Queda pendiente, fuera de este cambio, ajustar ese payload de ejemplo en la spec/design. |
+
+## api
+
 Discovery del componente `api`. Estados iniciales; no se han ejecutado pruebas ni verificado advisories externos durante este paso.
 
 > Nota (2026-11-03): se agregó un segundo discovery sobre `api` (sección
