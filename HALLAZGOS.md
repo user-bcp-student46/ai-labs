@@ -83,3 +83,50 @@ humana; no se crearon issues ni se modificó código de producción.
 - Prioridad propuesta: baja.
 - Contrato potencialmente afectado: ninguno de los endpoints; es un detalle interno de inicialización/cierre de la aplicación.
 - Cómo validarlo: migrar a un `lifespan` context manager (`@asynccontextmanager`) equivalente y volver a ejecutar la suite completa confirmando que ya no aparece el `DeprecationWarning` y que `close_connection` sigue invocándose al apagar la app (se puede verificar con una prueba que cierre el `TestClient` como context manager y confirme que la conexión queda cerrada).
+
+## web
+
+### HU01-S0 — Catálogo de mensajes y componentes de accesibilidad base
+
+Implementación siguiendo `openspec/changes/hu01-s0-catalogo-mensajes/` (proposal, specs, design y tasks)
+y `HU01-S0-catalogo-mensajes.md`. Cambio aditivo bajo `web/src/app/payment-ui/`; no se modificaron
+`LoginComponent`, `DashboardComponent` ni los contratos `/auth/login` o `/api/tasks`.
+
+- Código agregado:
+  - `payment-ui/messages/message-catalog.ts` y `message-catalog.service.ts`: catálogo de mensajes
+    centralizado y editable (claves por categoría: saludo, confirmación, estado, ayuda, error), con
+    resolución por clave y un resultado identificable (`[mensaje no configurado: ...]`) para claves sin
+    entrada, sin lanzar excepciones.
+  - `payment-ui/color-contrast.ts`: utilidad de cálculo de razón de contraste WCAG, reutilizada por el
+    componente de texto base.
+  - `payment-ui/components/{text,button,icon-text,screen-layout,processing-state}`: cinco componentes
+    Angular standalone que garantizan, respectivamente, tamaño de texto ≥18px y contraste WCAG AA, área
+    táctil de botón ≥48px, íconos siempre acompañados de texto (sin modo "solo ícono"), un único punto de
+    contenido principal con elemento de ayuda visible por defecto ("¿Necesitas ayuda?"), y un estado "En
+    proceso" cuyo mensaje tranquilizador (resuelto del catálogo) persiste en `localStorage`
+    (`workshop_payment_processing_active`, clave centralizada en `processing-state-storage.ts`) para
+    sobrevivir a un cierre y reapertura de la app.
+- Pruebas: 39 pruebas unitarias/de componente nuevas bajo `web/src/app/payment-ui/**/*.spec.ts` (catálogo
+  de mensajes, utilidad de contraste, y una prueba dedicada por componente, más una suite transversal
+  `components/accessibility.spec.ts` que confirma que los cinco componentes exponen roles/etiquetas ARIA).
+  Dado que `web/vitest.config.ts` usa `environment: 'node'` (sin DOM/TestBed) y el proyecto no tenía
+  pruebas de componente previas, las aserciones de tamaño/contraste/ARIA se verifican sobre las hojas de
+  estilo y el código fuente de la plantilla de cada componente (constantes exportadas + contenido CSS/TS),
+  en vez de medir un elemento renderizado en un DOM real; la persistencia en `localStorage` se prueba con
+  un almacenamiento en memoria equivalente inyectado en el entorno de prueba (ver comentarios en los
+  `*.spec.ts` correspondientes).
+- Resultados (rama `feature/hu01-s0-catalogo-mensajes`, commits de esta slice):
+  - Antes del cambio (baseline): `python tools/lab.py test web` → `npm test` 1 passed (1), `npm run
+    test:coverage` 1 passed (1), `npm run build` exitoso.
+  - Después del cambio: `python tools/lab.py test web` → `npm test` **39 passed (39)** en 10 archivos;
+    `npm run test:coverage` **39 passed (39)**; `npm run build` exitoso (sin nuevos errores ni
+    advertencias más allá de las ya existentes sobre `axios`/`lodash` en `LoginComponent`).
+  - Cobertura (`npm run test:coverage`, reporte v8): **100%** de sentencias/ramas/funciones/líneas en
+    todos los archivos bajo `src/app/payment-ui/` (catálogo, utilidad de contraste y los cinco
+    componentes), por encima de la meta de 85% del código modificado.
+  - Verificación de tipos adicional: `npx tsc --noEmit -p tsconfig.json` sin errores, confirmando que los
+    archivos nuevos (aún no importados por ninguna pantalla) están correctamente tipados pese a no formar
+    parte todavía del grafo de compilación de `ng build`.
+- No resuelto en esta slice (fuera de alcance, ver `tasks.md` — Fuera de alcance): construcción de las
+  pantallas funcionales del flujo de pago (HU01-S1–S4), copy final de los mensajes (pendiente con
+  producto) y persistencia real del intento de pago en backend.

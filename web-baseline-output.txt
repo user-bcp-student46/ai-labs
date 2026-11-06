@@ -1,0 +1,84 @@
+[web] C:\Program Files\nodejs\npm.CMD test
+
+> workshop-login-frontend@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mC:/Users/Usuario/Documents/T67941-cristhian-antonio/ai-labs/web[39m
+
+ [32m✓[39m src/app/utils/legacy-format.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m   Start at [22m 16:07:52
+[2m   Duration [22m 1.30s[2m (transform 88ms, setup 0ms, collect 74ms, tests 4ms, environment 0ms, prepare 371ms)[22m
+
+[web] C:\Program Files\nodejs\npm.CMD run test:coverage
+
+> workshop-login-frontend@0.1.0 test:coverage
+> vitest run --coverage
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mC:/Users/Usuario/Documents/T67941-cristhian-antonio/ai-labs/web[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m src/app/utils/legacy-format.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m   Start at [22m 16:07:56
+[2m   Duration [22m 2.35s[2m (transform 209ms, setup 0ms, collect 185ms, tests 6ms, environment 0ms, prepare 573ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |    3.65 |    22.22 |   33.33 |    3.65 |                   
+ src               |       0 |        0 |       0 |       0 |                   
+  main.ts          |       0 |        0 |       0 |       0 | 1-8               
+ src/app           |       0 |       50 |      50 |       0 |                   
+  app.component.ts |       0 |        0 |       0 |       0 | 1-10              
+  app.routes.ts    |       0 |      100 |     100 |       0 | 3-14              
+ src/app/dashboard |       0 |        0 |       0 |       0 |                   
+  ....component.ts |       0 |        0 |       0 |       0 | 1-79              
+ src/app/login     |       0 |        0 |       0 |       0 |                   
+  ....component.ts |       0 |        0 |       0 |       0 | 1-64              
+ src/app/utils     |      75 |       25 |     100 |      75 |                   
+  legacy-format.ts |      75 |       25 |     100 |      75 | 3-4               
+-------------------|---------|----------|---------|---------|-------------------
+[web] C:\Program Files\nodejs\npm.CMD run build
+
+> workshop-login-frontend@0.1.0 build
+> ng build
+
+[33m❯[39m Building...
+[32m✔[39m Building...
+[1mInitial chunk files[22m  [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-F6NPRRF2.js[39m    [2m | [22m[2m-[22m                  [2m | [22m[36m220.59 kB[39m[2m | [22m               [36m60.68 kB[39m
+[32mpolyfills-5CFQRCPP.js[39m[2m | [22m[2mpolyfills[22m          [2m | [22m [36m34.59 kB[39m[2m | [22m               [36m11.33 kB[39m
+[32mstyles-6ZHFPUQP.css[39m  [2m | [22m[2mstyles[22m             [2m | [22m  [36m1.47 kB[39m[2m | [22m              [36m636 bytes[39m
+[32mmain-C6LUH6OO.js[39m     [2m | [22m[2mmain[22m               [2m | [22m[36m636 bytes[39m[2m | [22m              [36m636 bytes[39m
+
+[1m [22m                    [2m | [22m[1mInitial total[22m      [2m | [22m[1m257.28 kB[22m[2m | [22m               [1m73.28 kB[22m
+
+[1mLazy chunk files[22m     [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-KFBDHFAJ.js[39m    [2m | [22m[2mlogin-component[22m    [2m | [22m [36m44.69 kB[39m[2m | [22m               [36m12.91 kB[39m
+[32mchunk-HU6HB25T.js[39m    [2m | [22m[2m-[22m                  [2m | [22m [36m25.11 kB[39m[2m | [22m                [36m8.66 kB[39m
+[32mchunk-FNE7HSLY.js[39m    [2m | [22m[2mdashboard-component[22m[2m | [22m  [36m6.58 kB[39m[2m | [22m                [36m2.36 kB[39m
+
+Application bundle generation complete. [24.385 seconds] - 2026-11-06T21:08:28.621Z
+
+▲ [WARNING] Module 'axios' used by 'src/app/login/login.component.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+▲ [WARNING] Module 'lodash/merge' used by 'src/app/login/login.component.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Output location: C:\Users\Usuario\Documents\T67941-cristhian-antonio\ai-labs\web\dist\workshop-login-frontend
+

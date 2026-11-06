@@ -1,0 +1,14 @@
+.payment-screen-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.payment-screen-layout__main {
+  flex: 1 1 auto;
+}
+
+.payment-screen-layout__help {
+  font-size: 18px;
+  color: #1a1a1a;
+}
