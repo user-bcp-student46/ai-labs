@@ -1,0 +1,118 @@
+[web] C:\Program Files\nodejs\npm.CMD test
+
+> workshop-login-frontend@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mC:/Users/Usuario/Documents/T67941-cristhian-antonio/ai-labs/web[39m
+
+ [32m✓[39m src/app/payment-ui/components/accessibility.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/processing-state/processing-state-storage.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/color-contrast.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/app/utils/legacy-format.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/icon-text/payment-icon-text.component.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/messages/message-catalog.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/text/payment-text.component.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/processing-state/payment-processing-state.component.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/button/payment-button.component.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/screen-layout/payment-screen-layout.component.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[32m39 passed[39m[22m[90m (39)[39m
+[2m   Start at [22m 16:16:18
+[2m   Duration [22m 3.71s[2m (transform 932ms, setup 0ms, collect 10.56s, tests 135ms, environment 6ms, prepare 5.81s)[22m
+
+[web] C:\Program Files\nodejs\npm.CMD run test:coverage
+
+> workshop-login-frontend@0.1.0 test:coverage
+> vitest run --coverage
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mC:/Users/Usuario/Documents/T67941-cristhian-antonio/ai-labs/web[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m src/app/payment-ui/components/accessibility.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/processing-state/processing-state-storage.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/color-contrast.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/app/utils/legacy-format.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/text/payment-text.component.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/messages/message-catalog.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/icon-text/payment-icon-text.component.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/processing-state/payment-processing-state.component.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/screen-layout/payment-screen-layout.component.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/app/payment-ui/components/button/payment-button.component.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[32m39 passed[39m[22m[90m (39)[39m
+[2m   Start at [22m 16:16:24
+[2m   Duration [22m 3.99s[2m (transform 1.05s, setup 0ms, collect 11.87s, tests 119ms, environment 7ms, prepare 5.68s)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   55.49 |    83.33 |   85.71 |   55.49 |                   
+ src               |       0 |        0 |       0 |       0 |                   
+  main.ts          |       0 |        0 |       0 |       0 | 1-8               
+ src/app           |       0 |       50 |      50 |       0 |                   
+  app.component.ts |       0 |        0 |       0 |       0 | 1-10              
+  app.routes.ts    |       0 |      100 |     100 |       0 | 3-14              
+ src/app/dashboard |       0 |        0 |       0 |       0 |                   
+  ....component.ts |       0 |        0 |       0 |       0 | 1-79              
+ src/app/login     |       0 |        0 |       0 |       0 |                   
+  ....component.ts |       0 |        0 |       0 |       0 | 1-64              
+ ...app/payment-ui |     100 |      100 |     100 |     100 |                   
+  ...r-contrast.ts |     100 |      100 |     100 |     100 |                   
+ ...ponents/button |     100 |      100 |     100 |     100 |                   
+  ....component.ts |     100 |      100 |     100 |     100 |                   
+ ...ents/icon-text |     100 |      100 |     100 |     100 |                   
+  ....component.ts |     100 |      100 |     100 |     100 |                   
+ ...ocessing-state |     100 |      100 |     100 |     100 |                   
+  ....component.ts |     100 |      100 |     100 |     100 |                   
+  ...te-storage.ts |     100 |      100 |     100 |     100 |                   
+ .../screen-layout |     100 |      100 |     100 |     100 |                   
+  ....component.ts |     100 |      100 |     100 |     100 |                   
+ ...omponents/text |     100 |      100 |     100 |     100 |                   
+  ....component.ts |     100 |      100 |     100 |     100 |                   
+ ...nt-ui/messages |     100 |      100 |     100 |     100 |                   
+  ...og.service.ts |     100 |      100 |     100 |     100 |                   
+  ...ge-catalog.ts |     100 |      100 |     100 |     100 |                   
+ src/app/utils     |      75 |       25 |     100 |      75 |                   
+  legacy-format.ts |      75 |       25 |     100 |      75 | 3-4               
+-------------------|---------|----------|---------|---------|-------------------
+[web] C:\Program Files\nodejs\npm.CMD run build
+
+> workshop-login-frontend@0.1.0 build
+> ng build
+
+[33m❯[39m Building...
+[32m✔[39m Building...
+[1mInitial chunk files[22m  [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-F6NPRRF2.js[39m    [2m | [22m[2m-[22m                  [2m | [22m[36m220.59 kB[39m[2m | [22m               [36m60.68 kB[39m
+[32mpolyfills-5CFQRCPP.js[39m[2m | [22m[2mpolyfills[22m          [2m | [22m [36m34.59 kB[39m[2m | [22m               [36m11.33 kB[39m
+[32mstyles-6ZHFPUQP.css[39m  [2m | [22m[2mstyles[22m             [2m | [22m  [36m1.47 kB[39m[2m | [22m              [36m636 bytes[39m
+[32mmain-C6LUH6OO.js[39m     [2m | [22m[2mmain[22m               [2m | [22m[36m636 bytes[39m[2m | [22m              [36m636 bytes[39m
+
+[1m [22m                    [2m | [22m[1mInitial total[22m      [2m | [22m[1m257.28 kB[22m[2m | [22m               [1m73.28 kB[22m
+
+[1mLazy chunk files[22m     [2m | [22m[1mNames[22m              [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-KFBDHFAJ.js[39m    [2m | [22m[2mlogin-component[22m    [2m | [22m [36m44.69 kB[39m[2m | [22m               [36m12.91 kB[39m
+[32mchunk-HU6HB25T.js[39m    [2m | [22m[2m-[22m                  [2m | [22m [36m25.11 kB[39m[2m | [22m                [36m8.66 kB[39m
+[32mchunk-FNE7HSLY.js[39m    [2m | [22m[2mdashboard-component[22m[2m | [22m  [36m6.58 kB[39m[2m | [22m                [36m2.36 kB[39m
+
+Application bundle generation complete. [7.735 seconds] - 2026-11-06T21:16:42.160Z
+
+▲ [WARNING] Module 'axios' used by 'src/app/login/login.component.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+▲ [WARNING] Module 'lodash/merge' used by 'src/app/login/login.component.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Output location: C:\Users\Usuario\Documents\T67941-cristhian-antonio\ai-labs\web\dist\workshop-login-frontend
+

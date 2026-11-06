@@ -1,0 +1,7 @@
+.payment-processing-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  color: #1a1a1a;
+}

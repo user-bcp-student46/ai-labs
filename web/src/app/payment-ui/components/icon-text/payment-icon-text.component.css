@@ -1,0 +1,10 @@
+.payment-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.payment-icon-text__icon {
+  display: inline-flex;
+}
